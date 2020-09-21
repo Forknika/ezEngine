@@ -38,6 +38,8 @@ public:
   ezResult Serialize(ezStreamWriter& stream) const;
   ezResult Deserialize(ezStreamReader& stream);
 
+  ezDynamicArray<ezInt8> m_TriggerInputPinStates;
+
 private:
   ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;
   ezDynamicArray<ezMat4, ezAlignedAllocatorWrapper> m_ModelSpaceTransforms;

@@ -3,6 +3,24 @@
 #include <EditorFramework/Assets/AssetDocument.h>
 #include <ToolsFoundation/NodeObject/DocumentNodeManager.h>
 
+class ezAnimationControllerNodePin : public ezPin
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimationControllerNodePin, ezPin);
+
+public:
+  ezAnimationControllerNodePin(Type type, const char* szName, const ezColorGammaUB& color, const ezDocumentObject* pObject);
+  ~ezAnimationControllerNodePin();
+
+  enum class DataType : ezUInt8
+  {
+    Invalid,
+    Trigger,
+    SkeletonMask,
+  };
+
+  DataType m_DataType = DataType::Invalid;
+};
+
 class ezAnimationControllerNodeManager : public ezDocumentNodeManager
 {
 public:

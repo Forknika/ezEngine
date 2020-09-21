@@ -14,6 +14,42 @@ class ezStreamWriter;
 class ezStreamReader;
 using ezAnimationClipResourceHandle = ezTypedResourceHandle<class ezAnimationClipResource>;
 
+class EZ_RENDERERCORE_DLL ezAnimCtrlPin : public ezReflectedClass
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlPin, ezReflectedClass);
+
+public:
+  ezInt16 m_iPinIndex = -1;
+};
+
+class EZ_RENDERERCORE_DLL ezAnimCtrlInputPin : public ezAnimCtrlPin
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlInputPin, ezAnimCtrlPin);
+
+public:
+};
+
+class EZ_RENDERERCORE_DLL ezAnimCtrlOutputPin : public ezAnimCtrlPin
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlOutputPin, ezAnimCtrlPin);
+
+public:
+};
+
+class EZ_RENDERERCORE_DLL ezAnimCtrlTriggerInputPin : public ezAnimCtrlInputPin
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlTriggerInputPin, ezAnimCtrlInputPin);
+
+public:
+};
+
+class EZ_RENDERERCORE_DLL ezAnimCtrlTriggerOutputPin : public ezAnimCtrlOutputPin
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlTriggerOutputPin, ezAnimCtrlOutputPin);
+
+public:
+};
+
 class EZ_RENDERERCORE_DLL ezAnimationControllerNode : public ezReflectedClass
 {
   EZ_ADD_DYNAMIC_REFLECTION(ezAnimationControllerNode, ezReflectedClass);
@@ -65,6 +101,9 @@ public:
   ezAnimationClipResourceHandle m_hAnimationClip;
 
 private:
+  ezAnimCtrlTriggerInputPin m_TriggerInputPin;   // [ property ]
+  ezAnimCtrlTriggerOutputPin m_TriggerOutputPin; // [ property ]
+
   ezHashedString m_sBlackboardEntry;
   ezHashedString m_sPartialBlendingRootBone;
   ezTime m_PlaybackTime;

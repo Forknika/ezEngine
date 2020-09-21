@@ -120,6 +120,8 @@ ezResult ezAnimationController::Serialize(ezStreamWriter& stream) const
 
   stream << m_hSkeleton;
 
+  //EZ_SUCCEED_OR_RETURN(stream.WriteArray(m_TriggerInputPinStates));
+
   EZ_SUCCEED_OR_RETURN(m_Blackboard.Serialize(stream));
 
   return EZ_SUCCESS;
@@ -144,6 +146,8 @@ ezResult ezAnimationController::Deserialize(ezStreamReader& stream)
   }
 
   stream >> m_hSkeleton;
+
+  //EZ_SUCCEED_OR_RETURN(stream.ReadArray(m_TriggerInputPinStates));
 
   EZ_SUCCEED_OR_RETURN(m_Blackboard.Deserialize(stream));
 

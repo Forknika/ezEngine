@@ -12,6 +12,28 @@
 // clang-format off
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimationControllerNode, 1, ezRTTINoAllocator)
 EZ_END_DYNAMIC_REFLECTED_TYPE;
+
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlPin>)
+{
+  EZ_BEGIN_PROPERTIES
+  {
+    EZ_MEMBER_PROPERTY("PinIdx", m_iPinIndex),
+  }
+  EZ_END_PROPERTIES;
+}
+EZ_END_DYNAMIC_REFLECTED_TYPE;
+
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlInputPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlInputPin>)
+EZ_END_DYNAMIC_REFLECTED_TYPE;
+
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlOutputPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlOutputPin>)
+EZ_END_DYNAMIC_REFLECTED_TYPE;
+
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlTriggerInputPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlTriggerInputPin>)
+EZ_END_DYNAMIC_REFLECTED_TYPE;
+
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlTriggerOutputPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlTriggerOutputPin>)
+EZ_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 ezAnimationControllerNode::ezAnimationControllerNode() = default;
@@ -42,7 +64,11 @@ EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezSampleAnimGraphNode, 1, ezRTTIDefaultAllocator
       EZ_MEMBER_PROPERTY("RampUpTime", m_RampUp),
       EZ_MEMBER_PROPERTY("RampDownTime", m_RampDown),
       EZ_ACCESSOR_PROPERTY("PartialBlendingRootBone", GetPartialBlendingRootBone, SetPartialBlendingRootBone),
-    } EZ_END_PROPERTIES;
+
+      EZ_MEMBER_PROPERTY("TriggerInputPin", m_TriggerInputPin),
+      EZ_MEMBER_PROPERTY("TriggerOutputPin", m_TriggerOutputPin),
+    }
+    EZ_END_PROPERTIES;
   }
 EZ_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
