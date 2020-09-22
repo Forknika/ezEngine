@@ -20,6 +20,9 @@ class EZ_RENDERERCORE_DLL ezAnimCtrlPin : public ezReflectedClass
 
 public:
   ezInt16 m_iPinIndex = -1;
+
+  ezResult Serialize(ezStreamWriter& stream) const;
+  ezResult Deserialize(ezStreamReader& stream);
 };
 
 class EZ_RENDERERCORE_DLL ezAnimCtrlInputPin : public ezAnimCtrlPin
@@ -41,6 +44,7 @@ class EZ_RENDERERCORE_DLL ezAnimCtrlTriggerInputPin : public ezAnimCtrlInputPin
   EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlTriggerInputPin, ezAnimCtrlInputPin);
 
 public:
+  bool IsTriggered(ezAnimationController& controller) const;
 };
 
 class EZ_RENDERERCORE_DLL ezAnimCtrlTriggerOutputPin : public ezAnimCtrlOutputPin
@@ -48,15 +52,19 @@ class EZ_RENDERERCORE_DLL ezAnimCtrlTriggerOutputPin : public ezAnimCtrlOutputPi
   EZ_ADD_DYNAMIC_REFLECTION(ezAnimCtrlTriggerOutputPin, ezAnimCtrlOutputPin);
 
 public:
+  void SetTriggered(ezAnimationController& controller, bool triggered);
+
+private:
+  bool m_bTriggered = false;
 };
 
-class EZ_RENDERERCORE_DLL ezAnimationControllerNode : public ezReflectedClass
+class EZ_RENDERERCORE_DLL ezAnimGraphNode : public ezReflectedClass
 {
-  EZ_ADD_DYNAMIC_REFLECTION(ezAnimationControllerNode, ezReflectedClass);
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimGraphNode, ezReflectedClass);
 
 public:
-  ezAnimationControllerNode();
-  virtual ~ezAnimationControllerNode();
+  ezAnimGraphNode();
+  virtual ~ezAnimGraphNode();
 
   virtual float UpdateWeight(ezTime tDiff) = 0;
   virtual void Step(ezTime tDiff, const ezSkeletonResource* pSkeleton) = 0;
@@ -74,9 +82,9 @@ protected:
   ozz::vector<ozz::math::SimdFloat4> m_ozzBlendWeightsSOA;
 };
 
-class EZ_RENDERERCORE_DLL ezSampleAnimGraphNode : public ezAnimationControllerNode
+class EZ_RENDERERCORE_DLL ezSampleAnimGraphNode : public ezAnimGraphNode
 {
-  EZ_ADD_DYNAMIC_REFLECTION(ezSampleAnimGraphNode, ezAnimationControllerNode);
+  EZ_ADD_DYNAMIC_REFLECTION(ezSampleAnimGraphNode, ezAnimGraphNode);
 
 public:
   virtual float UpdateWeight(ezTime tDiff) override;
@@ -101,8 +109,7 @@ public:
   ezAnimationClipResourceHandle m_hAnimationClip;
 
 private:
-  ezAnimCtrlTriggerInputPin m_TriggerInputPin;   // [ property ]
-  ezAnimCtrlTriggerOutputPin m_TriggerOutputPin; // [ property ]
+  ezAnimCtrlTriggerInputPin m_Active;   // [ property ]
 
   ezHashedString m_sBlackboardEntry;
   ezHashedString m_sPartialBlendingRootBone;
@@ -110,4 +117,27 @@ private:
   ozz::animation::SamplingCache m_ozzSamplingCache;
   float m_fCurWeight = 0.0f;
   bool m_bIsRampingUpOrDown = false;
+};
+
+class EZ_RENDERERCORE_DLL ezControllerInputAnimGraphNode : public ezAnimGraphNode
+{
+  EZ_ADD_DYNAMIC_REFLECTION(ezControllerInputAnimGraphNode, ezAnimGraphNode);
+
+public:
+  virtual float UpdateWeight(ezTime tDiff) override;
+  virtual void Step(ezTime ov, const ezSkeletonResource* pSkeleton) override;
+
+  virtual ezResult SerializeNode(ezStreamWriter& stream) const override;
+  virtual ezResult DeserializeNode(ezStreamReader& stream) override;
+
+private:
+  ezAnimCtrlTriggerOutputPin m_ButtonA; // [ property ]
+  ezAnimCtrlTriggerOutputPin m_ButtonB; // [ property ]
+  ezAnimCtrlTriggerOutputPin m_ButtonX; // [ property ]
+  ezAnimCtrlTriggerOutputPin m_ButtonY; // [ property ]
+
+  ezAnimCtrlTriggerOutputPin m_StickLeft;  // [ property ]
+  ezAnimCtrlTriggerOutputPin m_StickRight; // [ property ]
+  ezAnimCtrlTriggerOutputPin m_StickUp;    // [ property ]
+  ezAnimCtrlTriggerOutputPin m_StickDown;  // [ property ]
 };

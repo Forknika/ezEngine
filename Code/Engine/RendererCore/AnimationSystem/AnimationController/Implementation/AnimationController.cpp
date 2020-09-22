@@ -106,7 +106,7 @@ void ezAnimationController::SendResultTo(ezGameObject* pObject)
 
 ezResult ezAnimationController::Serialize(ezStreamWriter& stream) const
 {
-  stream.WriteVersion(1);
+  stream.WriteVersion(2);
 
   const ezUInt32 uiNumNodes = m_Nodes.GetCount();
   stream << uiNumNodes;
@@ -120,16 +120,22 @@ ezResult ezAnimationController::Serialize(ezStreamWriter& stream) const
 
   stream << m_hSkeleton;
 
-  //EZ_SUCCEED_OR_RETURN(stream.WriteArray(m_TriggerInputPinStates));
-
   EZ_SUCCEED_OR_RETURN(m_Blackboard.Serialize(stream));
+
+  EZ_SUCCEED_OR_RETURN(stream.WriteArray(m_TriggerInputPinStates));
+
+  stream << m_TriggerOutputToInputPinMapping.GetCount();
+  for (const auto& ar : m_TriggerOutputToInputPinMapping)
+  {
+    EZ_SUCCEED_OR_RETURN(stream.WriteArray(ar));
+  }
 
   return EZ_SUCCESS;
 }
 
 ezResult ezAnimationController::Deserialize(ezStreamReader& stream)
 {
-  stream.ReadVersion(1);
+  const auto uiVersion = stream.ReadVersion(2);
 
   ezUInt32 uiNumNodes = 0;
   stream >> uiNumNodes;
@@ -140,16 +146,27 @@ ezResult ezAnimationController::Deserialize(ezStreamReader& stream)
   for (auto& node : m_Nodes)
   {
     stream >> sTypeName;
-    node = std::move(ezRTTI::FindTypeByName(sTypeName)->GetAllocator()->Allocate<ezAnimationControllerNode>());
+    node = std::move(ezRTTI::FindTypeByName(sTypeName)->GetAllocator()->Allocate<ezAnimGraphNode>());
 
     node->DeserializeNode(stream);
   }
 
   stream >> m_hSkeleton;
 
-  //EZ_SUCCEED_OR_RETURN(stream.ReadArray(m_TriggerInputPinStates));
-
   EZ_SUCCEED_OR_RETURN(m_Blackboard.Deserialize(stream));
+
+  if (uiVersion >= 2)
+  {
+    EZ_SUCCEED_OR_RETURN(stream.ReadArray(m_TriggerInputPinStates));
+
+    ezUInt32 sar = 0;
+    stream >> sar;
+    m_TriggerOutputToInputPinMapping.SetCount(sar);
+    for (auto& ar : m_TriggerOutputToInputPinMapping)
+    {
+      EZ_SUCCEED_OR_RETURN(stream.ReadArray(ar));
+    }
+  }
 
   return EZ_SUCCESS;
 }

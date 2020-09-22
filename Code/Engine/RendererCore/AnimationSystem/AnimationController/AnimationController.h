@@ -29,7 +29,7 @@ public:
   void SendResultTo(ezGameObject* pObject);
   const ezVec3& GetRootMotion() const { return m_vRootMotion; }
 
-  ezDynamicArray<ezUniquePtr<ezAnimationControllerNode>> m_Nodes;
+  ezDynamicArray<ezUniquePtr<ezAnimGraphNode>> m_Nodes;
 
   ezSkeletonResourceHandle m_hSkeleton;
 
@@ -39,6 +39,7 @@ public:
   ezResult Deserialize(ezStreamReader& stream);
 
   ezDynamicArray<ezInt8> m_TriggerInputPinStates;
+  ezDynamicArray<ezDynamicArray<ezUInt16>> m_TriggerOutputToInputPinMapping;
 
 private:
   ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;

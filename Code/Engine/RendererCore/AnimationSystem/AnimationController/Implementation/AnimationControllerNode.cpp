@@ -1,6 +1,7 @@
 #include <RendererCorePCH.h>
 
 #include <AnimationSystem/AnimationClipResource.h>
+#include <Core/Input/InputManager.h>
 #include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
 #include <RendererCore/AnimationSystem/AnimationController/AnimationControllerNode.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
@@ -10,7 +11,7 @@
 #include <ozz/animation/runtime/skeleton_utils.h>
 
 // clang-format off
-EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimationControllerNode, 1, ezRTTINoAllocator)
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimGraphNode, 1, ezRTTINoAllocator)
 EZ_END_DYNAMIC_REFLECTED_TYPE;
 
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlPin, 1, ezRTTIDefaultAllocator<ezAnimCtrlPin>)
@@ -36,16 +37,16 @@ EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimCtrlTriggerOutputPin, 1, ezRTTIDefaultAllo
 EZ_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-ezAnimationControllerNode::ezAnimationControllerNode() = default;
-ezAnimationControllerNode::~ezAnimationControllerNode() = default;
+ezAnimGraphNode::ezAnimGraphNode() = default;
+ezAnimGraphNode::~ezAnimGraphNode() = default;
 
-ezResult ezAnimationControllerNode::SerializeNode(ezStreamWriter& stream) const
+ezResult ezAnimGraphNode::SerializeNode(ezStreamWriter& stream) const
 {
   stream.WriteVersion(1);
   return EZ_SUCCESS;
 }
 
-ezResult ezAnimationControllerNode::DeserializeNode(ezStreamReader& stream)
+ezResult ezAnimGraphNode::DeserializeNode(ezStreamReader& stream)
 {
   stream.ReadVersion(1);
   return EZ_SUCCESS;
@@ -65,8 +66,7 @@ EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezSampleAnimGraphNode, 1, ezRTTIDefaultAllocator
       EZ_MEMBER_PROPERTY("RampDownTime", m_RampDown),
       EZ_ACCESSOR_PROPERTY("PartialBlendingRootBone", GetPartialBlendingRootBone, SetPartialBlendingRootBone),
 
-      EZ_MEMBER_PROPERTY("TriggerInputPin", m_TriggerInputPin),
-      EZ_MEMBER_PROPERTY("TriggerOutputPin", m_TriggerOutputPin),
+      EZ_MEMBER_PROPERTY("Active", m_Active),
     }
     EZ_END_PROPERTIES;
   }
@@ -110,14 +110,17 @@ ezResult ezSampleAnimGraphNode::DeserializeNode(ezStreamReader& stream)
 
 float ezSampleAnimGraphNode::UpdateWeight(ezTime tDiff)
 {
-  const ezVariant vValue = m_pOwner->m_Blackboard.GetEntryValue(m_sBlackboardEntry);
-
-  if (!vValue.IsFloatingPoint())
+  if (!m_Active.IsTriggered(*m_pOwner))
     return 0.0f;
+
+  //const ezVariant vValue = m_pOwner->m_Blackboard.GetEntryValue(m_sBlackboardEntry);
+
+  //if (!vValue.IsFloatingPoint())
+  //  return 0.0f;
 
   m_vRootMotion.SetZero();
 
-  const float fValue = vValue.ConvertTo<float>();
+  const float fValue = 1.0f; //vValue.ConvertTo<float>();
 
   if (m_fCurWeight < fValue)
   {
@@ -262,4 +265,143 @@ void ezSampleAnimGraphNode::SetPartialBlendingRootBone(const char* szBone)
 const char* ezSampleAnimGraphNode::GetPartialBlendingRootBone() const
 {
   return m_sPartialBlendingRootBone.GetData();
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+// clang-format off
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezControllerInputAnimGraphNode, 1, ezRTTIDefaultAllocator<ezControllerInputAnimGraphNode>)
+  {
+    EZ_BEGIN_PROPERTIES
+    {
+      EZ_MEMBER_PROPERTY("ButtonA", m_ButtonA),
+      EZ_MEMBER_PROPERTY("ButtonB", m_ButtonB),
+      EZ_MEMBER_PROPERTY("ButtonX", m_ButtonX),
+      EZ_MEMBER_PROPERTY("ButtonY", m_ButtonY),
+      EZ_MEMBER_PROPERTY("StickLeft", m_StickLeft),
+      EZ_MEMBER_PROPERTY("StickRight", m_StickRight),
+      EZ_MEMBER_PROPERTY("StickUp", m_StickUp),
+      EZ_MEMBER_PROPERTY("StickDown", m_StickDown),
+    }
+    EZ_END_PROPERTIES;
+  }
+EZ_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
+
+ezResult ezControllerInputAnimGraphNode::SerializeNode(ezStreamWriter& stream) const
+{
+  stream.WriteVersion(1);
+
+  EZ_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+
+  m_ButtonA.Serialize(stream);
+  m_ButtonB.Serialize(stream);
+  m_ButtonX.Serialize(stream);
+  m_ButtonY.Serialize(stream);
+
+  m_StickLeft.Serialize(stream);
+  m_StickRight.Serialize(stream);
+  m_StickUp.Serialize(stream);
+  m_StickDown.Serialize(stream);
+
+  return EZ_SUCCESS;
+}
+
+ezResult ezControllerInputAnimGraphNode::DeserializeNode(ezStreamReader& stream)
+{
+  stream.ReadVersion(1);
+
+  EZ_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+
+  m_ButtonA.Deserialize(stream);
+  m_ButtonB.Deserialize(stream);
+  m_ButtonX.Deserialize(stream);
+  m_ButtonY.Deserialize(stream);
+
+  m_StickLeft.Deserialize(stream);
+  m_StickRight.Deserialize(stream);
+  m_StickUp.Deserialize(stream);
+  m_StickDown.Deserialize(stream);
+
+  return EZ_SUCCESS;
+}
+
+float ezControllerInputAnimGraphNode::UpdateWeight(ezTime tDiff)
+{
+  float fValue = 0.0f;
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_LeftStick_NegX, &fValue);
+  m_StickLeft.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_LeftStick_PosX, &fValue);
+  m_StickRight.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_LeftStick_NegY, &fValue);
+  m_StickDown.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_LeftStick_PosY, &fValue);
+  m_StickUp.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_ButtonA, &fValue);
+  m_ButtonA.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_ButtonB, &fValue);
+  m_ButtonB.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_ButtonX, &fValue);
+  m_ButtonX.SetTriggered(*m_pOwner, fValue > 0);
+
+  ezInputManager::GetInputSlotState(ezInputSlot_Controller0_ButtonY, &fValue);
+  m_ButtonY.SetTriggered(*m_pOwner, fValue > 0);
+
+
+  return 0.0f;
+}
+
+void ezControllerInputAnimGraphNode::Step(ezTime tDiff, const ezSkeletonResource* pSkeleton)
+{
+  EZ_ASSERT_NOT_IMPLEMENTED;
+}
+
+ezResult ezAnimCtrlPin::Serialize(ezStreamWriter& stream) const
+{
+  stream << m_iPinIndex;
+  return EZ_SUCCESS;
+}
+
+ezResult ezAnimCtrlPin::Deserialize(ezStreamReader& stream)
+{
+  stream >> m_iPinIndex;
+  return EZ_SUCCESS;
+}
+
+void ezAnimCtrlTriggerOutputPin::SetTriggered(ezAnimationController& controller, bool triggered)
+{
+  if (m_iPinIndex < 0)
+    return;
+
+  if (m_bTriggered == triggered)
+    return;
+
+  m_bTriggered = triggered;
+
+  const auto& map = controller.m_TriggerOutputToInputPinMapping[m_iPinIndex];
+
+  const ezInt8 offset = triggered ? +1 : -1;
+
+  // trigger or reset all input pins that are connected to this output pin
+  for (ezUInt16 idx : map)
+  {
+    controller.m_TriggerInputPinStates[idx] += offset;
+  }
+}
+
+bool ezAnimCtrlTriggerInputPin::IsTriggered(ezAnimationController& controller) const
+{
+  if (m_iPinIndex < 0)
+    return false;
+
+  return controller.m_TriggerInputPinStates[m_iPinIndex] > 0;
 }
