@@ -87,6 +87,8 @@ ezResult ezSampleAnimGraphNode::SerializeNode(ezStreamWriter& stream) const
   stream << m_fSpeed;
   stream << m_sPartialBlendingRootBone;
 
+  EZ_SUCCEED_OR_RETURN(m_Active.Serialize(stream));
+
   return EZ_SUCCESS;
 }
 
@@ -103,6 +105,8 @@ ezResult ezSampleAnimGraphNode::DeserializeNode(ezStreamReader& stream)
   stream >> m_hAnimationClip;
   stream >> m_fSpeed;
   stream >> m_sPartialBlendingRootBone;
+
+  EZ_SUCCEED_OR_RETURN(m_Active.Deserialize(stream));
 
   return EZ_SUCCESS;
 }
