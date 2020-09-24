@@ -5,9 +5,9 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <Foundation/Strings/HashedString.h>
 #include <GameEngine/Animation/Skeletal/AnimationControllerComponent.h>
+#include <Physics/CharacterControllerComponent.h>
 #include <RendererCore/AnimationSystem/AnimationController/AnimationControllerResource.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
-#include <Physics/CharacterControllerComponent.h>
 
 // clang-format off
 EZ_BEGIN_COMPONENT_TYPE(ezAnimationControllerComponent, 1, ezComponentMode::Static);
@@ -179,29 +179,6 @@ void ezAnimationControllerComponent::Update()
   }
 
   pOwner->SendMessage(msg);
-
-  //if (!vRootMotion.IsZero(0.0f))
-  //{
-
-  //  ezVec3 vNewPos = pOwner->GetGlobalPosition();
-  //  vNewPos += pOwner->GetGlobalDirForwards() * vRootMotion.x;
-  //  vNewPos += pOwner->GetGlobalDirRight() * vRootMotion.y;
-  //  vNewPos += pOwner->GetGlobalDirUp() * vRootMotion.z;
-
-  //  pOwner->SetGlobalPosition(vNewPos);
-  //}
-
-
-  //if (fRotate != 0)
-  //{
-  //  const ezTime tDiff = GetWorld()->GetClock().GetTimeDiff();
-
-  //  const ezQuat curRot = pOwner->GetLocalRotation();
-  //  ezQuat rot;
-  //  rot.SetFromAxisAndAngle(ezVec3::UnitZAxis(), ezAngle::Degree(fRotate * 90.0f * tDiff.AsFloatInSeconds()));
-
-  //  pOwner->SetLocalRotation(rot * curRot);
-  //}
 }
 
 EZ_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_AnimationControllerComponent);
