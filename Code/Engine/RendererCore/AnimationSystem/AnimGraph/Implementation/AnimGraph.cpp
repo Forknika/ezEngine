@@ -1,16 +1,16 @@
 #include <RendererCorePCH.h>
 
 #include <Core/World/GameObject.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 #include <ozz/animation/runtime/blending_job.h>
 #include <ozz/animation/runtime/local_to_model_job.h>
 #include <ozz/animation/runtime/skeleton.h>
 
-ezAnimationController::ezAnimationController() = default;
-ezAnimationController::~ezAnimationController() = default;
+ezAnimGraph::ezAnimGraph() = default;
+ezAnimGraph::~ezAnimGraph() = default;
 
-void ezAnimationController::Update(ezTime tDiff)
+void ezAnimGraph::Update(ezTime tDiff)
 {
   if (!m_hSkeleton.IsValid())
     return;
@@ -65,7 +65,7 @@ void ezAnimationController::Update(ezTime tDiff)
   m_bFinalized = false;
 }
 
-void ezAnimationController::Finalize(const ezSkeletonResource* pSkeleton)
+void ezAnimGraph::Finalize(const ezSkeletonResource* pSkeleton)
 {
   if (m_bFinalized)
     return;
@@ -86,7 +86,7 @@ void ezAnimationController::Finalize(const ezSkeletonResource* pSkeleton)
   }
 }
 
-void ezAnimationController::SendResultTo(ezGameObject* pObject)
+void ezAnimGraph::SendResultTo(ezGameObject* pObject)
 {
   if (!m_hSkeleton.IsValid())
     return;
@@ -104,7 +104,7 @@ void ezAnimationController::SendResultTo(ezGameObject* pObject)
   pObject->SendMessageRecursive(msg);
 }
 
-ezResult ezAnimationController::Serialize(ezStreamWriter& stream) const
+ezResult ezAnimGraph::Serialize(ezStreamWriter& stream) const
 {
   stream.WriteVersion(2);
 
@@ -133,7 +133,7 @@ ezResult ezAnimationController::Serialize(ezStreamWriter& stream) const
   return EZ_SUCCESS;
 }
 
-ezResult ezAnimationController::Deserialize(ezStreamReader& stream)
+ezResult ezAnimGraph::Deserialize(ezStreamReader& stream)
 {
   const auto uiVersion = stream.ReadVersion(2);
 

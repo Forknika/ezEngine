@@ -1,7 +1,7 @@
 #include <RendererCorePCH.h>
 
-#include <RendererCore/AnimationSystem/AnimationController/AnimNodes/BlackboardAnimNodes.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/BlackboardAnimNodes.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 
 // clang-format off
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezSetBlackboardValueAnimNode, 1, ezRTTIDefaultAllocator<ezSetBlackboardValueAnimNode>)

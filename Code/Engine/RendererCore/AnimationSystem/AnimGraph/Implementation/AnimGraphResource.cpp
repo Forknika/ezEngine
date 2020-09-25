@@ -2,31 +2,31 @@
 
 #include <Core/Assets/AssetFileHeader.h>
 #include <Foundation/IO/MemoryStream.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerResource.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphResource.h>
 
 // clang-format off
-EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimationControllerResource, 1, ezRTTIDefaultAllocator<ezAnimationControllerResource>)
+EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimGraphResource, 1, ezRTTIDefaultAllocator<ezAnimGraphResource>)
 EZ_END_DYNAMIC_REFLECTED_TYPE;
 
-EZ_RESOURCE_IMPLEMENT_COMMON_CODE(ezAnimationControllerResource);
+EZ_RESOURCE_IMPLEMENT_COMMON_CODE(ezAnimGraphResource);
 // clang-format on
 
-ezAnimationControllerResource::ezAnimationControllerResource()
+ezAnimGraphResource::ezAnimGraphResource()
   : ezResource(ezResource::DoUpdate::OnAnyThread, 0)
 {
 }
 
-ezAnimationControllerResource::~ezAnimationControllerResource() = default;
+ezAnimGraphResource::~ezAnimGraphResource() = default;
 
-void ezAnimationControllerResource::DeserializeAnimationControllerState(ezAnimationController& out)
+void ezAnimGraphResource::DeserializeAnimGraphState(ezAnimGraph& out)
 {
   ezMemoryStreamContainerWrapperStorage<ezDataBuffer> wrapper(&m_Storage);
   ezMemoryStreamReader reader(&wrapper);
   out.Deserialize(reader);
 }
 
-ezResourceLoadDesc ezAnimationControllerResource::UnloadData(Unload WhatToUnload)
+ezResourceLoadDesc ezAnimGraphResource::UnloadData(Unload WhatToUnload)
 {
   m_Storage.Clear();
   m_Storage.Compact();
@@ -38,7 +38,7 @@ ezResourceLoadDesc ezAnimationControllerResource::UnloadData(Unload WhatToUnload
   return d;
 }
 
-ezResourceLoadDesc ezAnimationControllerResource::UpdateContent(ezStreamReader* Stream)
+ezResourceLoadDesc ezAnimGraphResource::UpdateContent(ezStreamReader* Stream)
 {
   ezResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -68,7 +68,7 @@ ezResourceLoadDesc ezAnimationControllerResource::UpdateContent(ezStreamReader* 
   return res;
 }
 
-void ezAnimationControllerResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
+void ezAnimGraphResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
 {
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
   out_NewMemoryUsage.m_uiMemoryCPU = m_Storage.GetHeapMemoryUsage();

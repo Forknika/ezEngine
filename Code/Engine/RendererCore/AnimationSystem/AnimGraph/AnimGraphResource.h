@@ -5,22 +5,22 @@
 #include <Core/ResourceManager/Resource.h>
 #include <Foundation/Containers/DynamicArray.h>
 
-class ezAnimationController;
+class ezAnimGraph;
 
 //////////////////////////////////////////////////////////////////////////
 
-using ezAnimationControllerResourceHandle = ezTypedResourceHandle<class ezAnimationControllerResource>;
+using ezAnimGraphResourceHandle = ezTypedResourceHandle<class ezAnimGraphResource>;
 
-class EZ_RENDERERCORE_DLL ezAnimationControllerResource : public ezResource
+class EZ_RENDERERCORE_DLL ezAnimGraphResource : public ezResource
 {
-  EZ_ADD_DYNAMIC_REFLECTION(ezAnimationControllerResource, ezResource);
-  EZ_RESOURCE_DECLARE_COMMON_CODE(ezAnimationControllerResource);
+  EZ_ADD_DYNAMIC_REFLECTION(ezAnimGraphResource, ezResource);
+  EZ_RESOURCE_DECLARE_COMMON_CODE(ezAnimGraphResource);
 
 public:
-  ezAnimationControllerResource();
-  ~ezAnimationControllerResource();
+  ezAnimGraphResource();
+  ~ezAnimGraphResource();
 
-  void DeserializeAnimationControllerState(ezAnimationController& out);
+  void DeserializeAnimGraphState(ezAnimGraph& out);
 
 private:
   virtual ezResourceLoadDesc UnloadData(Unload WhatToUnload) override;

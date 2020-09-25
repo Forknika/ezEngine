@@ -4,10 +4,10 @@
 
 #include <Core/World/Component.h>
 #include <Core/World/ComponentManager.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 
 using ezSkeletonResourceHandle = ezTypedResourceHandle<class ezSkeletonResource>;
-using ezAnimationControllerResourceHandle = ezTypedResourceHandle<class ezAnimationControllerResource>;
+using ezAnimGraphResourceHandle = ezTypedResourceHandle<class ezAnimGraphResource>;
 
 using ezAnimationControllerComponentManager = ezComponentManagerSimple<class ezAnimationControllerComponent, ezComponentUpdateType::WhenSimulating, ezBlockStorageType::FreeList>;
 
@@ -38,6 +38,6 @@ public:
 protected:
   void Update();
 
-  ezAnimationControllerResourceHandle m_hAnimationController;
-  ezAnimationController m_AnimationGraph;
+  ezAnimGraphResourceHandle m_hAnimationController;
+  ezAnimGraph m_AnimationGraph;
 };

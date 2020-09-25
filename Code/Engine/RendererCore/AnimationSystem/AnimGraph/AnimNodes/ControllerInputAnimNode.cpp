@@ -1,7 +1,7 @@
 #include <RendererCorePCH.h>
 
 #include <Core/Input/InputManager.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimNodes/ControllerInputAnimNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/ControllerInputAnimNode.h>
 
 // clang-format off
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezControllerInputAnimNode, 1, ezRTTIDefaultAllocator<ezControllerInputAnimNode>)

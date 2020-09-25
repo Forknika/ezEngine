@@ -2,7 +2,7 @@
 
 #include <Core/ResourceManager/ResourceHandle.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/soa_transform.h>
@@ -39,7 +39,7 @@ public:
   ezAnimationClipResourceHandle m_hAnimationClip;
 
 private:
-  ezAnimCtrlTriggerInputPin m_Active; // [ property ]
+  ezAnimGraphTriggerInputPin m_Active; // [ property ]
 
   ezHashedString m_sBlackboardEntry;
   ezHashedString m_sPartialBlendingRootBone;

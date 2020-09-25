@@ -7,7 +7,7 @@
 #include <Foundation/Containers/DynamicArray.h>
 #include <Foundation/Memory/AllocatorWrapper.h>
 #include <Foundation/Types/UniquePtr.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/soa_transform.h>
 
@@ -17,13 +17,13 @@ class ezStreamReader;
 
 using ezSkeletonResourceHandle = ezTypedResourceHandle<class ezSkeletonResource>;
 
-class EZ_RENDERERCORE_DLL ezAnimationController
+class EZ_RENDERERCORE_DLL ezAnimGraph
 {
-  EZ_DISALLOW_COPY_AND_ASSIGN(ezAnimationController);
+  EZ_DISALLOW_COPY_AND_ASSIGN(ezAnimGraph);
 
 public:
-  ezAnimationController();
-  ~ezAnimationController();
+  ezAnimGraph();
+  ~ezAnimGraph();
 
   void Update(ezTime tDiff);
   void SendResultTo(ezGameObject* pObject);

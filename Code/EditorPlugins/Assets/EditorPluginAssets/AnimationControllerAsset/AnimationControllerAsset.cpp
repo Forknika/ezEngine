@@ -8,8 +8,8 @@
 #include <Foundation/Serialization/BinarySerializer.h>
 #include <Foundation/Serialization/RttiConverter.h>
 #include <GuiFoundation/NodeEditor/NodeScene.moc.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationController.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <RendererCore/Pipeline/RenderPipelineNode.h>
 #include <ToolsFoundation/Command/NodeCommands.h>
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
@@ -41,18 +41,18 @@ void ezAnimationControllerNodeManager::InternalCreatePins(const ezDocumentObject
 
   for (ezAbstractProperty* pProp : properties)
   {
-    if (pProp->GetCategory() != ezPropertyCategory::Member || !pProp->GetSpecificType()->IsDerivedFrom<ezAnimCtrlPin>())
+    if (pProp->GetCategory() != ezPropertyCategory::Member || !pProp->GetSpecificType()->IsDerivedFrom<ezAnimGraphPin>())
       continue;
 
     ezColor pinColor = ezColor::Grey;
 
-    if (pProp->GetSpecificType()->IsDerivedFrom<ezAnimCtrlInputPin>())
+    if (pProp->GetSpecificType()->IsDerivedFrom<ezAnimGraphInputPin>())
     {
       ezAnimationControllerNodePin* pPin = EZ_DEFAULT_NEW(ezAnimationControllerNodePin, ezPin::Type::Input, pProp->GetPropertyName(), pinColor, pObject);
       pPin->m_DataType = ezAnimationControllerNodePin::DataType::Trigger;
       node.m_Inputs.PushBack(pPin);
     }
-    else if (pProp->GetSpecificType()->IsDerivedFrom<ezAnimCtrlOutputPin>())
+    else if (pProp->GetSpecificType()->IsDerivedFrom<ezAnimGraphOutputPin>())
     {
       ezAnimationControllerNodePin* pPin = EZ_DEFAULT_NEW(ezAnimationControllerNodePin, ezPin::Type::Output, pProp->GetPropertyName(), pinColor, pObject);
       pPin->m_DataType = ezAnimationControllerNodePin::DataType::Trigger;
@@ -179,11 +179,11 @@ ezStatus ezAnimationControllerAssetDocument::InternalTransformAsset(ezStreamWrit
     }
   }
 
-  ezAnimationController animController;
+  ezAnimGraph animController;
   animController.m_TriggerInputPinStates.SetCount(pinCounts[(ezUInt8)ezAnimationControllerNodePin::DataType::Trigger].m_uiInputCount);
   animController.m_TriggerOutputToInputPinMapping.SetCount(pinCounts[(ezUInt8)ezAnimationControllerNodePin::DataType::Trigger].m_uiOutputCount);
 
-  auto pIdxProperty = static_cast<ezAbstractMemberProperty*>(ezAnimCtrlPin::GetStaticRTTI()->FindPropertyByName("PinIdx", false));
+  auto pIdxProperty = static_cast<ezAbstractMemberProperty*>(ezAnimGraphPin::GetStaticRTTI()->FindPropertyByName("PinIdx", false));
   EZ_ASSERT_DEBUG(pIdxProperty, "Missing PinIdx property");
 
   ezDynamicArray<ezAnimGraphNode*> newNodes;

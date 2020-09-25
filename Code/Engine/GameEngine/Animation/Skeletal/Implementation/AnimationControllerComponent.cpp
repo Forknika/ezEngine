@@ -6,7 +6,7 @@
 #include <Foundation/Strings/HashedString.h>
 #include <GameEngine/Animation/Skeletal/AnimationControllerComponent.h>
 #include <Physics/CharacterControllerComponent.h>
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerResource.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphResource.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
@@ -49,11 +49,11 @@ void ezAnimationControllerComponent::DeserializeComponent(ezWorldReader& stream)
 
 void ezAnimationControllerComponent::SetAnimationControllerFile(const char* szFile)
 {
-  ezAnimationControllerResourceHandle hResource;
+  ezAnimGraphResourceHandle hResource;
 
   if (!ezStringUtils::IsNullOrEmpty(szFile))
   {
-    hResource = ezResourceManager::LoadResource<ezAnimationControllerResource>(szFile);
+    hResource = ezResourceManager::LoadResource<ezAnimGraphResource>(szFile);
   }
 
   m_hAnimationController = hResource;
@@ -81,11 +81,11 @@ void ezAnimationControllerComponent::OnSimulationStarted()
   if (!msg.m_hSkeleton.IsValid())
     return;
 
-  ezResourceLock<ezAnimationControllerResource> pAnimController(m_hAnimationController, ezResourceAcquireMode::BlockTillLoaded_NeverFail);
+  ezResourceLock<ezAnimGraphResource> pAnimController(m_hAnimationController, ezResourceAcquireMode::BlockTillLoaded_NeverFail);
   if (pAnimController.GetAcquireResult() != ezResourceAcquireResult::Final)
     return;
 
-  pAnimController->DeserializeAnimationControllerState(m_AnimationGraph);
+  pAnimController->DeserializeAnimGraphState(m_AnimationGraph);
 
   m_AnimationGraph.m_hSkeleton = msg.m_hSkeleton;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RendererCore/AnimationSystem/AnimationController/AnimationControllerNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
 class EZ_RENDERERCORE_DLL ezSetBlackboardValueAnimNode : public ezAnimGraphNode
 {
@@ -22,7 +22,7 @@ public:
   bool m_bSetOnDeactivation = true;   // [ property ]
 
 private:
-  ezAnimCtrlTriggerInputPin m_Active; // [ property ]
+  ezAnimGraphTriggerInputPin m_Active; // [ property ]
   ezHashedString m_sBlackboardEntry;
   bool m_bLastActiveState = false;
 };
@@ -63,7 +63,7 @@ public:
   ezEnum<ezComparisonOperator> m_Comparison; // [ property ]
 
 private:
-  ezAnimCtrlTriggerOutputPin m_Active; // [ property ]
+  ezAnimGraphTriggerOutputPin m_Active; // [ property ]
 
   ezHashedString m_sBlackboardEntry;
 };

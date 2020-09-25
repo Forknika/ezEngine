@@ -1,6 +1,6 @@
 #include <RendererCorePCH.h>
 
-#include <RendererCore/AnimationSystem/AnimationController/AnimNodes/PlayClipAnimNode.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/PlayClipAnimNode.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 #include <ozz/animation/runtime/animation.h>
