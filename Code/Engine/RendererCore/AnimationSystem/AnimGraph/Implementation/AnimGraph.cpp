@@ -3,6 +3,7 @@
 #include <Core/World/GameObject.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
+#include <ozz/animation/runtime/animation.h>
 #include <ozz/animation/runtime/blending_job.h>
 #include <ozz/animation/runtime/local_to_model_job.h>
 #include <ozz/animation/runtime/skeleton.h>
@@ -168,7 +169,7 @@ ezAnimGraphBlendWeights* ezAnimGraph::AllocateBlendWeights(const ezSkeletonResou
   if (!m_BlendWeightsFreeList.IsEmpty())
   {
     pWeights = m_BlendWeightsFreeList.PeekBack();
-    m_BlendWeightsFreeList.PeekBack();
+    m_BlendWeightsFreeList.PopBack();
   }
   else
   {
@@ -187,4 +188,61 @@ void ezAnimGraph::FreeBlendWeights(ezAnimGraphBlendWeights*& pWeights)
 
   m_BlendWeightsFreeList.PushBack(pWeights);
   pWeights = nullptr;
+}
+
+ezAnimGraphLocalTransforms* ezAnimGraph::AllocateLocalTransforms(const ezSkeletonResource& skeleton)
+{
+  ezAnimGraphLocalTransforms* pTransforms = nullptr;
+
+  if (!m_LocalTransformsFreeList.IsEmpty())
+  {
+    pTransforms = m_LocalTransformsFreeList.PeekBack();
+    m_LocalTransformsFreeList.PopBack();
+  }
+  else
+  {
+    pTransforms = &m_LocalTransforms.ExpandAndGetRef();
+  }
+
+  pTransforms->m_ozzLocalTransforms.resize(skeleton.GetDescriptor().m_Skeleton.GetOzzSkeleton().num_soa_joints());
+
+  return pTransforms;
+}
+
+void ezAnimGraph::FreeLocalTransforms(ezAnimGraphLocalTransforms*& pTransforms)
+{
+  if (pTransforms == nullptr)
+    return;
+
+  m_LocalTransformsFreeList.PushBack(pTransforms);
+  pTransforms = nullptr;
+}
+
+ezAnimGraphSamplingCache* ezAnimGraph::AllocateSamplingCache(const ozz::animation::Animation& animclip)
+{
+  ezAnimGraphSamplingCache* pCache = nullptr;
+
+  if (!m_SamplingCachesFreeList.IsEmpty())
+  {
+    pCache = m_SamplingCachesFreeList.PeekBack();
+    m_SamplingCachesFreeList.PopBack();
+  }
+  else
+  {
+    pCache = &m_SamplingCaches.ExpandAndGetRef();
+  }
+
+  pCache->m_ozzSamplingCache.Resize(animclip.num_tracks());
+
+  return pCache;
+}
+
+void ezAnimGraph::FreeSamplingCache(ezAnimGraphSamplingCache*& pCache)
+{
+  if (pCache == nullptr)
+    return;
+
+  pCache->m_ozzSamplingCache.Invalidate();
+  m_SamplingCachesFreeList.PushBack(pCache);
+  pCache = nullptr;
 }

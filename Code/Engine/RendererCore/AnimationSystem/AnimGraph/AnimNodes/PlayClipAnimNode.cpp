@@ -101,6 +101,8 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
   {
     m_PlaybackTime.SetZero();
     pOwner->FreeBlendWeights(m_pPartialBlendingMask);
+    pOwner->FreeLocalTransforms(m_pLocalTransforms);
+    pOwner->FreeSamplingCache(m_pSamplingCache);
     return;
   }
 
@@ -121,18 +123,22 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
 
   const ozz::animation::Animation* pOzzAnimation = &animDesc.GetMappedOzzAnimation(*pSkeleton);
 
-  if (m_ozzSamplingCache.max_tracks() < pOzzAnimation->num_tracks())
+  if (m_pLocalTransforms == nullptr)
   {
-    m_ozzSamplingCache.Resize(pOzzAnimation->num_tracks());
-    m_ozzLocalTransforms.resize(pOzzSkeleton->num_soa_joints());
+    m_pLocalTransforms = pOwner->AllocateLocalTransforms(*pSkeleton);
+  }
+
+  if (m_pSamplingCache == nullptr)
+  {
+    m_pSamplingCache = pOwner->AllocateSamplingCache(*pOzzAnimation);
   }
 
   {
     ozz::animation::SamplingJob job;
     job.animation = pOzzAnimation;
-    job.cache = &m_ozzSamplingCache;
+    job.cache = &m_pSamplingCache->m_ozzSamplingCache;
     job.ratio = m_PlaybackTime.AsFloatInSeconds() / animDesc.GetDuration().AsFloatInSeconds();
-    job.output = make_span(m_ozzLocalTransforms);
+    job.output = make_span(m_pLocalTransforms->m_ozzLocalTransforms);
     EZ_ASSERT_DEBUG(job.Validate(), "");
     job.Run();
   }
@@ -177,7 +183,7 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
 
   ozz::animation::BlendingJob::Layer layer;
   layer.weight = m_fCurWeight;
-  layer.transform = make_span(m_ozzLocalTransforms);
+  layer.transform = make_span(m_pLocalTransforms->m_ozzLocalTransforms);
 
   if (m_pPartialBlendingMask != nullptr)
   {

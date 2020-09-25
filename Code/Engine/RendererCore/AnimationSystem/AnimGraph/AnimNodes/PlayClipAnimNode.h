@@ -49,7 +49,7 @@ private:
   float m_fCurWeight = 0.0f;
   bool m_bIsRampingUpOrDown = false;
 
-  ozz::animation::SamplingCache m_ozzSamplingCache;
-  ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;
+  ezAnimGraphSamplingCache* m_pSamplingCache = nullptr;
+  ezAnimGraphLocalTransforms* m_pLocalTransforms = nullptr;
   ezAnimGraphBlendWeights* m_pPartialBlendingMask = nullptr;
 };
