@@ -18,6 +18,11 @@ class ezStreamReader;
 
 using ezSkeletonResourceHandle = ezTypedResourceHandle<class ezSkeletonResource>;
 
+struct ezAnimGraphBlendWeights
+{
+  ozz::vector<ozz::math::SimdFloat4> m_ozzBlendWeights;
+};
+
 class EZ_RENDERERCORE_DLL ezAnimGraph
 {
   EZ_DISALLOW_COPY_AND_ASSIGN(ezAnimGraph);
@@ -48,10 +53,15 @@ public:
   /// \brief To be called by ezAnimGraphNode classes every frame that they want to affect the root motion
   void AddFrameRootMotion(const ezVec3& motion);
 
+  ezAnimGraphBlendWeights* AllocateBlendWeights(const ezSkeletonResource& skeleton);
+  void FreeBlendWeights(ezAnimGraphBlendWeights*& pWeights);
+
 private:
   ezDynamicArray<ozz::animation::BlendingJob::Layer> m_ozzBlendLayers;
   ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;
   ezDynamicArray<ezMat4, ezAlignedAllocatorWrapper> m_ModelSpaceTransforms;
+  ezDeque<ezAnimGraphBlendWeights> m_BlendWeights;
+  ezHybridArray<ezAnimGraphBlendWeights*, 16> m_BlendWeightsFreeList;
 
   bool m_bFinalized = false;
   ezVec3 m_vRootMotion;

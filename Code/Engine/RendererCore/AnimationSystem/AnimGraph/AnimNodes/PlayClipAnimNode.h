@@ -51,5 +51,5 @@ private:
 
   ozz::animation::SamplingCache m_ozzSamplingCache;
   ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;
-  ozz::vector<ozz::math::SimdFloat4> m_ozzBlendWeightsSOA;
+  ezAnimGraphBlendWeights* m_pPartialBlendingMask = nullptr;
 };

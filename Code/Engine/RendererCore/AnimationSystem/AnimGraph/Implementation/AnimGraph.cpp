@@ -160,3 +160,31 @@ void ezAnimGraph::AddFrameRootMotion(const ezVec3& motion)
 {
   m_vRootMotion += motion;
 }
+
+ezAnimGraphBlendWeights* ezAnimGraph::AllocateBlendWeights(const ezSkeletonResource& skeleton)
+{
+  ezAnimGraphBlendWeights* pWeights = nullptr;
+
+  if (!m_BlendWeightsFreeList.IsEmpty())
+  {
+    pWeights = m_BlendWeightsFreeList.PeekBack();
+    m_BlendWeightsFreeList.PeekBack();
+  }
+  else
+  {
+    pWeights = &m_BlendWeights.ExpandAndGetRef();
+  }
+
+  pWeights->m_ozzBlendWeights.resize(skeleton.GetDescriptor().m_Skeleton.GetOzzSkeleton().num_soa_joints());
+
+  return pWeights;
+}
+
+void ezAnimGraph::FreeBlendWeights(ezAnimGraphBlendWeights*& pWeights)
+{
+  if (pWeights == nullptr)
+    return;
+
+  m_BlendWeightsFreeList.PushBack(pWeights);
+  pWeights = nullptr;
+}

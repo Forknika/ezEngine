@@ -100,6 +100,8 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
   if (m_fCurWeight <= 0.0f)
   {
     m_PlaybackTime.SetZero();
+    pOwner->FreeBlendWeights(m_pPartialBlendingMask);
+    return;
   }
 
   const auto& skeleton = pSkeleton->GetDescriptor().m_Skeleton;
@@ -137,10 +139,11 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
 
   if (!m_sPartialBlendingRootBone.IsEmpty())
   {
-    if (m_bIsRampingUpOrDown || m_ozzBlendWeightsSOA.empty())
+    if (m_pPartialBlendingMask == nullptr)
     {
-      m_ozzBlendWeightsSOA.resize(pOzzSkeleton->num_soa_joints());
-      ezMemoryUtils::ZeroFill<ezUInt8>((ezUInt8*)m_ozzBlendWeightsSOA.data(), m_ozzBlendWeightsSOA.size() * sizeof(ozz::math::SimdFloat4));
+      m_pPartialBlendingMask = pOwner->AllocateBlendWeights(*pSkeleton);
+
+      ezMemoryUtils::ZeroFill<ezUInt8>((ezUInt8*)m_pPartialBlendingMask->m_ozzBlendWeights.data(), m_pPartialBlendingMask->m_ozzBlendWeights.size() * sizeof(ozz::math::SimdFloat4));
 
       int iRootBone = -1;
       for (int iBone = 0; iBone < pOzzSkeleton->num_joints(); ++iBone)
@@ -158,7 +161,7 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
         const int iJointIdx0 = currentBone / 4;
         const int iJointIdx1 = currentBone % 4;
 
-        ozz::math::SimdFloat4& soa_weight = m_ozzBlendWeightsSOA.at(iJointIdx0);
+        ozz::math::SimdFloat4& soa_weight = m_pPartialBlendingMask->m_ozzBlendWeights.at(iJointIdx0);
         soa_weight = ozz::math::SetI(soa_weight, ozz::math::simd_float4::Load1(fBoneWeight), iJointIdx1);
       };
 
@@ -167,7 +170,7 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
   }
   else
   {
-    m_ozzBlendWeightsSOA.clear();
+    pOwner->FreeBlendWeights(m_pPartialBlendingMask);
   }
 
   pOwner->AddFrameRootMotion(pAnimClip->GetDescriptor().m_vConstantRootMotion * tDiff.AsFloatInSeconds() * m_fCurWeight);
@@ -176,9 +179,9 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
   layer.weight = m_fCurWeight;
   layer.transform = make_span(m_ozzLocalTransforms);
 
-  if (!m_ozzBlendWeightsSOA.empty())
+  if (m_pPartialBlendingMask != nullptr)
   {
-    layer.joint_weights = make_span(m_ozzBlendWeightsSOA);
+    layer.joint_weights = make_span(m_pPartialBlendingMask->m_ozzBlendWeights);
   }
 
   pOwner->AddFrameBlendLayer(layer);
