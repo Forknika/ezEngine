@@ -1,7 +1,7 @@
 #include <RendererCorePCH.h>
 
-#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphPins.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraphPins.h>
 
 // clang-format off
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezAnimGraphPin, 1, ezRTTIDefaultAllocator<ezAnimGraphPin>)

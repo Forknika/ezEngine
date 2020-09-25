@@ -8,6 +8,7 @@
 #include <Foundation/Memory/AllocatorWrapper.h>
 #include <Foundation/Types/UniquePtr.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
+#include <ozz/animation/runtime/blending_job.h>
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/soa_transform.h>
 
@@ -41,7 +42,14 @@ public:
   ezDynamicArray<ezInt8> m_TriggerInputPinStates;
   ezDynamicArray<ezDynamicArray<ezUInt16>> m_TriggerOutputToInputPinMapping;
 
+  /// \brief To be called by ezAnimGraphNode classes every frame that they want to affect animation
+  void AddFrameBlendLayer(const ozz::animation::BlendingJob::Layer& layer);
+
+  /// \brief To be called by ezAnimGraphNode classes every frame that they want to affect the root motion
+  void AddFrameRootMotion(const ezVec3& motion);
+
 private:
+  ezDynamicArray<ozz::animation::BlendingJob::Layer> m_ozzBlendLayers;
   ozz::vector<ozz::math::SoaTransform> m_ozzLocalTransforms;
   ezDynamicArray<ezMat4, ezAlignedAllocatorWrapper> m_ModelSpaceTransforms;
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <RendererCore/RendererCoreDLL.h>
 #include <Foundation/Reflection/Reflection.h>
+#include <RendererCore/RendererCoreDLL.h>
 
 class ezAnimGraph;
 class ezStreamWriter;

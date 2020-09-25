@@ -6,12 +6,14 @@ class EZ_RENDERERCORE_DLL ezControllerInputAnimNode : public ezAnimGraphNode
 {
   EZ_ADD_DYNAMIC_REFLECTION(ezControllerInputAnimNode, ezAnimGraphNode);
 
-public:
-  virtual float UpdateWeight(ezTime tDiff) override;
-  virtual void Step(ezTime ov, const ezSkeletonResource* pSkeleton) override;
+  //////////////////////////////////////////////////////////////////////////
+  // ezAnimGraphNode
 
+protected:
   virtual ezResult SerializeNode(ezStreamWriter& stream) const override;
   virtual ezResult DeserializeNode(ezStreamReader& stream) override;
+
+  virtual void Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton) override;
 
 private:
   ezAnimGraphTriggerOutputPin m_ButtonA; // [ property ]

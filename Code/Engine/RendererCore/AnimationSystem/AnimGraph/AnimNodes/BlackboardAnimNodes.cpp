@@ -1,7 +1,7 @@
 #include <RendererCorePCH.h>
 
-#include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/BlackboardAnimNodes.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
+#include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/BlackboardAnimNodes.h>
 
 // clang-format off
 EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezSetBlackboardValueAnimNode, 1, ezRTTIDefaultAllocator<ezSetBlackboardValueAnimNode>)
@@ -65,39 +65,32 @@ const char* ezSetBlackboardValueAnimNode::GetBlackboardEntry() const
   return m_sBlackboardEntry.GetData();
 }
 
-float ezSetBlackboardValueAnimNode::UpdateWeight(ezTime tDiff)
+void ezSetBlackboardValueAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton)
 {
-  const bool bIsActiveNow = m_Active.IsTriggered(*m_pOwner);
+  const bool bIsActiveNow = m_Active.IsTriggered(*pOwner);
 
   if (bIsActiveNow != m_bLastActiveState)
   {
     m_bLastActiveState = bIsActiveNow;
 
     // TODO: register only once
-    m_pOwner->m_Blackboard.RegisterEntry(m_sBlackboardEntry, 0.0f);
+    pOwner->m_Blackboard.RegisterEntry(m_sBlackboardEntry, 0.0f);
 
     if (bIsActiveNow)
     {
       if (m_bSetOnActivation)
       {
-        m_pOwner->m_Blackboard.SetEntryValue(m_sBlackboardEntry, m_fOnActivatedValue);
+        pOwner->m_Blackboard.SetEntryValue(m_sBlackboardEntry, m_fOnActivatedValue);
       }
     }
     else
     {
       if (m_bSetOnDeactivation)
       {
-        m_pOwner->m_Blackboard.SetEntryValue(m_sBlackboardEntry, m_fOnDeactivatedValue);
+        pOwner->m_Blackboard.SetEntryValue(m_sBlackboardEntry, m_fOnDeactivatedValue);
       }
     }
   }
-
-  return 0.0f;
-}
-
-void ezSetBlackboardValueAnimNode::Step(ezTime tDiff, const ezSkeletonResource* pSkeleton)
-{
-  EZ_ASSERT_NOT_IMPLEMENTED;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -188,25 +181,22 @@ static bool Compare(ezComparisonOperator::Enum cmp, float f1, float f2)
   return false;
 }
 
-float ezCheckBlackboardValueAnimNode::UpdateWeight(ezTime tDiff)
+void ezCheckBlackboardValueAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton)
 {
-  ezVariant value = m_pOwner->m_Blackboard.GetEntryValue(m_sBlackboardEntry);
-  if (!value.IsValid() || !value.IsFloatingPoint())
-    return 0.0f;
+  ezVariant value = pOwner->m_Blackboard.GetEntryValue(m_sBlackboardEntry);
+  float fValue = 0.0f;
 
-  if (Compare(m_Comparison, value.ConvertTo<float>(), m_fReferenceValue))
+  if (value.IsValid() && value.IsFloatingPoint())
   {
-    m_Active.SetTriggered(*m_pOwner, true);
+    fValue = value.ConvertTo<float>();
+  }
+
+  if (Compare(m_Comparison, fValue, m_fReferenceValue))
+  {
+    m_Active.SetTriggered(*pOwner, true);
   }
   else
   {
-    m_Active.SetTriggered(*m_pOwner, false);
+    m_Active.SetTriggered(*pOwner, false);
   }
-
-  return 0.0f;
-}
-
-void ezCheckBlackboardValueAnimNode::Step(ezTime tDiff, const ezSkeletonResource* pSkeleton)
-{
-  EZ_ASSERT_NOT_IMPLEMENTED;
 }

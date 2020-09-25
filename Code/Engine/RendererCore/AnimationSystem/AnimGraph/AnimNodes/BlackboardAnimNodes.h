@@ -6,13 +6,19 @@ class EZ_RENDERERCORE_DLL ezSetBlackboardValueAnimNode : public ezAnimGraphNode
 {
   EZ_ADD_DYNAMIC_REFLECTION(ezSetBlackboardValueAnimNode, ezAnimGraphNode);
 
-public:
-  virtual float UpdateWeight(ezTime tDiff) override;
-  virtual void Step(ezTime ov, const ezSkeletonResource* pSkeleton) override;
+  //////////////////////////////////////////////////////////////////////////
+  // ezAnimGraphNode
 
+protected:
   virtual ezResult SerializeNode(ezStreamWriter& stream) const override;
   virtual ezResult DeserializeNode(ezStreamReader& stream) override;
 
+  virtual void Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton) override;
+
+  //////////////////////////////////////////////////////////////////////////
+  // ezSetBlackboardValueAnimNode
+
+public:
   void SetBlackboardEntry(const char* szFile); // [ property ]
   const char* GetBlackboardEntry() const;      // [ property ]
 
@@ -49,13 +55,19 @@ class EZ_RENDERERCORE_DLL ezCheckBlackboardValueAnimNode : public ezAnimGraphNod
 {
   EZ_ADD_DYNAMIC_REFLECTION(ezCheckBlackboardValueAnimNode, ezAnimGraphNode);
 
-public:
-  virtual float UpdateWeight(ezTime tDiff) override;
-  virtual void Step(ezTime ov, const ezSkeletonResource* pSkeleton) override;
+  //////////////////////////////////////////////////////////////////////////
+  // ezAnimGraphNode
 
+protected:
   virtual ezResult SerializeNode(ezStreamWriter& stream) const override;
   virtual ezResult DeserializeNode(ezStreamReader& stream) override;
 
+  virtual void Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton) override;
+
+  //////////////////////////////////////////////////////////////////////////
+  // ezCheckBlackboardValueAnimNode
+
+public:
   void SetBlackboardEntry(const char* szFile); // [ property ]
   const char* GetBlackboardEntry() const;      // [ property ]
 

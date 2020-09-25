@@ -21,33 +21,13 @@ void ezAnimGraph::Update(ezTime tDiff)
 
   auto pOzzSkeleton = &pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton();
 
-  ezHybridArray<ozz::animation::BlendingJob::Layer, 8> layers;
+  m_ozzBlendLayers.Clear();
 
   m_vRootMotion.SetZero();
 
-  float fTotalWeight = 0.0f;
   for (const auto& pNode : m_Nodes)
   {
-    pNode->m_pOwner = this;
-    const float fWeight = pNode->UpdateWeight(tDiff);
-
-    if (fWeight <= 0.0f)
-      continue;
-
-    fTotalWeight += fWeight;
-
-    pNode->Step(tDiff, pSkeleton.GetPointer());
-
-    auto& l = layers.ExpandAndGetRef();
-    l.weight = fWeight;
-    l.transform = make_span(pNode->m_ozzLocalTransforms);
-
-    if (!pNode->m_ozzBlendWeightsSOA.empty())
-    {
-      l.joint_weights = make_span(pNode->m_ozzBlendWeightsSOA);
-    }
-
-    m_vRootMotion += pNode->GetRootMotion() * fWeight;
+    pNode->Step(this, tDiff, pSkeleton.GetPointer());
   }
 
   {
@@ -55,7 +35,7 @@ void ezAnimGraph::Update(ezTime tDiff)
 
     ozz::animation::BlendingJob job;
     job.threshold = 0.1f;
-    job.layers = ozz::span<const ozz::animation::BlendingJob::Layer>(begin(layers), end(layers));
+    job.layers = ozz::span<const ozz::animation::BlendingJob::Layer>(begin(m_ozzBlendLayers), end(m_ozzBlendLayers));
     job.bind_pose = pOzzSkeleton->joint_bind_poses();
     job.output = make_span(m_ozzLocalTransforms);
     EZ_ASSERT_DEBUG(job.Validate(), "");
@@ -169,4 +149,14 @@ ezResult ezAnimGraph::Deserialize(ezStreamReader& stream)
   }
 
   return EZ_SUCCESS;
+}
+
+void ezAnimGraph::AddFrameBlendLayer(const ozz::animation::BlendingJob::Layer& layer)
+{
+  m_ozzBlendLayers.PushBack(layer);
+}
+
+void ezAnimGraph::AddFrameRootMotion(const ezVec3& motion)
+{
+  m_vRootMotion += motion;
 }

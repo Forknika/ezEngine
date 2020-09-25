@@ -206,10 +206,10 @@ ezStatus ezAnimationControllerAssetDocument::InternalTransformAsset(ezStreamWrit
         if (pProp->GetCategory() != ezPropertyCategory::Member)
           continue;
 
-        if (!pProp->GetSpecificType()->GetTypeFlags().IsSet(ezTypeFlags::StandardType))
-          continue;
-
-        ezReflectionUtils::SetMemberPropertyValue(static_cast<ezAbstractMemberProperty*>(pProp), pNewNode, pNode->GetTypeAccessor().GetValue(pProp->GetPropertyName()));
+        if (pProp->GetSpecificType()->GetTypeFlags().IsAnySet(ezTypeFlags::StandardType | ezTypeFlags::IsEnum | ezTypeFlags::Bitflags))
+        {
+          ezReflectionUtils::SetMemberPropertyValue(static_cast<ezAbstractMemberProperty*>(pProp), pNewNode, pNode->GetTypeAccessor().GetValue(pProp->GetPropertyName()));
+        }
       }
     }
   }

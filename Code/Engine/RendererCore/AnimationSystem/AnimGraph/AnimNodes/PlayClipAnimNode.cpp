@@ -1,9 +1,11 @@
 #include <RendererCorePCH.h>
 
+#include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/PlayClipAnimNode.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 #include <ozz/animation/runtime/animation.h>
+#include <ozz/animation/runtime/blending_job.h>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/animation/runtime/skeleton.h>
 #include <ozz/animation/runtime/skeleton_utils.h>
@@ -14,7 +16,6 @@ EZ_BEGIN_DYNAMIC_REFLECTED_TYPE(ezPlayClipAnimNode, 1, ezRTTIDefaultAllocator<ez
     EZ_BEGIN_PROPERTIES
     {
       EZ_ACCESSOR_PROPERTY("AnimationClip", GetAnimationClip, SetAnimationClip)->AddAttributes(new ezAssetBrowserAttribute("Animation Clip")),
-      EZ_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
       EZ_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new ezDefaultValueAttribute(1.0f)),
       EZ_MEMBER_PROPERTY("RampUpTime", m_RampUp),
       EZ_MEMBER_PROPERTY("RampDownTime", m_RampDown),
@@ -33,7 +34,6 @@ ezResult ezPlayClipAnimNode::SerializeNode(ezStreamWriter& stream) const
 
   EZ_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
-  stream << m_sBlackboardEntry;
   stream << m_RampUp;
   stream << m_RampDown;
   stream << m_PlaybackTime;
@@ -52,7 +52,6 @@ ezResult ezPlayClipAnimNode::DeserializeNode(ezStreamReader& stream)
 
   EZ_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
-  stream >> m_sBlackboardEntry;
   stream >> m_RampUp;
   stream >> m_RampDown;
   stream >> m_PlaybackTime;
@@ -65,20 +64,21 @@ ezResult ezPlayClipAnimNode::DeserializeNode(ezStreamReader& stream)
   return EZ_SUCCESS;
 }
 
-
-float ezPlayClipAnimNode::UpdateWeight(ezTime tDiff)
+void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeletonResource* pSkeleton)
 {
-  if (!m_Active.IsTriggered(*m_pOwner))
-    return 0.0f;
+  if (!m_hAnimationClip.IsValid())
+    return;
 
-  // const ezVariant vValue = m_pOwner->m_Blackboard.GetEntryValue(m_sBlackboardEntry);
+  ezResourceLock<ezAnimationClipResource> pAnimClip(m_hAnimationClip, ezResourceAcquireMode::BlockTillLoaded_NeverFail);
+  if (pAnimClip.GetAcquireResult() != ezResourceAcquireResult::Final)
+    return;
 
-  // if (!vValue.IsFloatingPoint())
-  //  return 0.0f;
+  float fValue = 0.0f;
 
-  m_vRootMotion.SetZero();
-
-  const float fValue = 1.0f; // vValue.ConvertTo<float>();
+  if (m_Active.IsTriggered(*pOwner))
+  {
+    fValue = 1.0f;
+  }
 
   if (m_fCurWeight < fValue)
   {
@@ -101,18 +101,6 @@ float ezPlayClipAnimNode::UpdateWeight(ezTime tDiff)
   {
     m_PlaybackTime.SetZero();
   }
-
-  return m_fCurWeight;
-}
-
-void ezPlayClipAnimNode::Step(ezTime tDiff, const ezSkeletonResource* pSkeleton)
-{
-  if (!m_hAnimationClip.IsValid())
-    return;
-
-  ezResourceLock<ezAnimationClipResource> pAnimClip(m_hAnimationClip, ezResourceAcquireMode::BlockTillLoaded_NeverFail);
-  if (pAnimClip.GetAcquireResult() != ezResourceAcquireResult::Final)
-    return;
 
   const auto& skeleton = pSkeleton->GetDescriptor().m_Skeleton;
   const auto pOzzSkeleton = &pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton();
@@ -182,7 +170,18 @@ void ezPlayClipAnimNode::Step(ezTime tDiff, const ezSkeletonResource* pSkeleton)
     m_ozzBlendWeightsSOA.clear();
   }
 
-  m_vRootMotion = pAnimClip->GetDescriptor().m_vConstantRootMotion * tDiff.AsFloatInSeconds();
+  pOwner->AddFrameRootMotion(pAnimClip->GetDescriptor().m_vConstantRootMotion * tDiff.AsFloatInSeconds() * m_fCurWeight);
+
+  ozz::animation::BlendingJob::Layer layer;
+  layer.weight = m_fCurWeight;
+  layer.transform = make_span(m_ozzLocalTransforms);
+
+  if (!m_ozzBlendWeightsSOA.empty())
+  {
+    layer.joint_weights = make_span(m_ozzBlendWeightsSOA);
+  }
+
+  pOwner->AddFrameBlendLayer(layer);
 }
 
 void ezPlayClipAnimNode::SetAnimationClip(const char* szFile)
@@ -203,16 +202,6 @@ const char* ezPlayClipAnimNode::GetAnimationClip() const
     return "";
 
   return m_hAnimationClip.GetResourceID();
-}
-
-void ezPlayClipAnimNode::SetBlackboardEntry(const char* szFile)
-{
-  m_sBlackboardEntry.Assign(szFile);
-}
-
-const char* ezPlayClipAnimNode::GetBlackboardEntry() const
-{
-  return m_sBlackboardEntry.GetData();
 }
 
 void ezPlayClipAnimNode::SetPartialBlendingRootBone(const char* szBone)
