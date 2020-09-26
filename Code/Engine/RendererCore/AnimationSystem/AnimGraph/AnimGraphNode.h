@@ -8,6 +8,9 @@ class ezSkeletonResource;
 class ezAnimGraph;
 class ezStreamWriter;
 class ezStreamReader;
+struct ezAnimGraphSamplingCache;
+struct ezAnimGraphLocalTransforms;
+struct ezAnimGraphBlendWeights;
 
 class EZ_RENDERERCORE_DLL ezAnimGraphNode : public ezReflectedClass
 {

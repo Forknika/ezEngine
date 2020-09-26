@@ -69,7 +69,7 @@ void ezPlayClipAnimNode::Step(ezAnimGraph* pOwner, ezTime tDiff, const ezSkeleto
   if (!m_hAnimationClip.IsValid())
     return;
 
-  ezResourceLock<ezAnimationClipResource> pAnimClip(m_hAnimationClip, ezResourceAcquireMode::BlockTillLoaded_NeverFail);
+  ezResourceLock<ezAnimationClipResource> pAnimClip(m_hAnimationClip, ezResourceAcquireMode::BlockTillLoaded);
   if (pAnimClip.GetAcquireResult() != ezResourceAcquireResult::Final)
     return;
 
